@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bi.lan.mapper.BiLanMapper">
+	
+	<resultMap id="Jinse" type="bi.lan.model.Jinse">
+		<result property="id" column="id" />
+		<result property="text" column="text" />
+		<result property="url" column="url" />
+		<result property="time" column="time" />
+	</resultMap>
+	
+	<resultMap id="Feixiaohao" type="bi.lan.model.Feixiaohao">
+		<result property="id" column="id" />
+		<result property="currencyName" column="currency_name" />
+		<result property="currencyImg" column="currency_img" />
+		<result property="marketPrice" column="market_price" />
+		<result property="price" column="price" />
+		<result property="marketNum" column="market_num" />
+		<result property="markeyRate" column="markey_rate" />
+		<result property="turnover24h" column="turnover24h" />
+		<result property="rose1h" column="rose1h" />
+		<result property="rose24h" column="rose24h" />
+		<result property="rose7d" column="rose7d" />
+		<result property="high24h" column="high24h" />
+		<result property="low24h" column="low24h" />
+		<result property="describe" column="describe" />
+	</resultMap>
+	
+	<resultMap id="Walian" type="bi.lan.model.Walian">
+		<result property="id" column="id" />
+		<result property="logo" column="logo" />
+		<result property="title" column="title" />
+		<result property="intro" column="intro" />
+		<result property="content" column="content" />
+		<result property="time" column="time" />
+	</resultMap>
+	
+	<select id="getJinseMaxTime" resultType="java.sql.Timestamp">
+		SELECT `time` FROM tb_consult ORDER BY `time` DESC LIMIT 0,1
+	</select>
+	
+	<select id="getExistIds" resultType="Integer">
+		SELECT `id` FROM tb_consult WHERE `id` IN
+		<if test="list != null and list.size() > 0">
+            <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+	</select>
+	
+	<insert id="batchInsertJinse">
+        INSERT INTO tb_consult(`id`,`text`,`url`,`time`) VALUES
+        <if test="list != null and list.size() > 0">
+            <foreach item="item" index="index" collection="list" separator=",">
+                (#{item.id}, #{item.text}, #{item.url}, #{item.time})
+            </foreach>
+        </if>
+    </insert>
+    
+    <insert id="batchInsertFeixiaohao">
+        INSERT INTO tb_currency(`id`,`currency_name`,`currency_img`,`market_price`,`price`,
+        `market_num`,`markey_rate`,`turnover24h`,`rose1h`,`rose24h`,`rose7d`,`high24h`,`low24h`,`describe`) VALUES
+        <if test="list != null and list.size() > 0">
+            <foreach item="item" index="index" collection="list" separator=",">
+                (#{item.id}, #{item.currencyName}, #{item.currencyImg}, #{item.marketPrice}, #{item.price}, 
+                #{item.marketNum}, #{item.markeyRate}, #{item.turnover24h}, #{item.rose1h}, #{item.rose24h}, #{item.rose7d}, 
+                #{item.high24h}, #{item.low24h}, #{item.describe})
+            </foreach>
+        </if>
+    </insert>
+    
+    <update id="updateFeixiaohao">
+    		UPDATE tb_currency 
+    		<set>
+	        <if test="currencyName != null and currencyName != ''">
+	            `currency_name` = #{currencyName},
+	        </if>
+	        <if test="currencyImg != null and currencyImg != ''">
+	            `currency_img` = #{currencyImg},
+	        </if>
+	        <if test="marketPrice != null and marketPrice != ''">
+	            `market_price` = #{marketPrice},
+	        </if>
+	        <if test="price != null and price != ''">
+	            `price` = #{price},
+	        </if>
+	        <if test="marketNum != null and marketNum != ''">
+	            `market_num` = #{marketNum},
+	        </if>
+	        <if test="markeyRate != null and markeyRate != ''">
+	            `markey_rate` = #{markeyRate},
+	        </if>
+	        <if test="turnover24h != null and turnover24h != ''">
+	            `turnover24h` = #{turnover24h},
+	        </if>
+	        <if test="rose1h != null and rose1h != ''">
+	            `rose1h` = #{rose1h},
+	        </if>
+	        <if test="rose24h != null and rose24h != ''">
+	            `rose24h` = #{rose24h},
+	        </if>
+	        <if test="rose7d != null and rose7d != ''">
+	            `rose7d` = #{rose7d},
+	        </if>
+	        <if test="high24h != null and high24h != ''">
+	            `high24h` = #{high24h},
+	        </if>
+	        <if test="low24h != null and low24h != ''">
+	            `low24h` = #{low24h}
+	        </if>
+        </set>
+    		WHERE `id` = #{id}
+    </update>
+    
+    <insert id="batchInsertWailian">
+        INSERT INTO tb_news(`id`,`logo`,`title`,`intro`,`content`,`time`) VALUES
+        <if test="list != null and list.size() > 0">
+            <foreach item="item" index="index" collection="list" separator=",">
+                (#{item.id}, #{item.logo}, #{item.title}, #{item.intro}, #{item.content}, #{item.time})
+            </foreach>
+        </if>
+    </insert>
+    
+    <select id="getWalanMaxTime" resultType="java.sql.Timestamp">
+    		SELECT `time` FROM tb_news ORDER BY `TIME` DESC LIMIT 0,1
+    </select>
+    
+    <select id="getWalianExistIds" resultType="Integer">
+    		SELECT `id` FROM tb_news WHERE `id` IN
+		<if test="list != null and list.size() > 0">
+            <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+	
+</mapper>
