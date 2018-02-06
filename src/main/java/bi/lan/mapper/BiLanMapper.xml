@@ -14,6 +14,7 @@
 	<resultMap id="Feixiaohao" type="bi.lan.model.Feixiaohao">
 		<result property="id" column="id" />
 		<result property="currencyName" column="currency_name" />
+		<result property="currencyUrl" column="currency_url" />
 		<result property="currencyImg" column="currency_img" />
 		<result property="marketPrice" column="market_price" />
 		<result property="price" column="price" />
@@ -51,7 +52,7 @@
 	</select>
 	
 	<select id="getFeixiaohaoExistIds" resultType="Integer">
-    		SELECT `id` FROM tb_currency WHERE `id` IN
+    		SELECT `currency_url` FROM tb_currency WHERE `id` IN
 		<if test="list != null and list.size() > 0">
             <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
                 #{item}
@@ -69,11 +70,11 @@
     </insert>
     
     <insert id="batchInsertFeixiaohao">
-        INSERT INTO tb_currency(`id`,`currency_name`,`currency_img`,`market_price`,`price`,
+        INSERT INTO tb_currency(`currency_name`,`currency_url`,`currency_img`,`market_price`,`price`,
         `market_num`,`markey_rate`,`turnover24h`,`rose1h`,`rose24h`,`rose7d`,`high24h`,`low24h`,`describe`) VALUES
         <if test="list != null and list.size() > 0">
             <foreach item="item" index="index" collection="list" separator=",">
-                (#{item.id}, #{item.currencyName}, #{item.currencyImg}, #{item.marketPrice}, #{item.price}, 
+                (#{item.currencyName}, #{item.currencyUrl}, #{item.currencyImg}, #{item.marketPrice}, #{item.price}, 
                 #{item.marketNum}, #{item.markeyRate}, #{item.turnover24h}, #{item.rose1h}, #{item.rose24h}, #{item.rose7d}, 
                 #{item.high24h}, #{item.low24h}, #{item.describe})
             </foreach>
@@ -120,7 +121,7 @@
 	            `low24h` = #{low24h}
 	        </if>
         </set>
-    		WHERE `id` = #{id}
+    		WHERE `currency_url` = #{currencyUrl}
     </update>
     
     <insert id="batchInsertWailian">

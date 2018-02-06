@@ -8,6 +8,7 @@ public class Feixiaohao {
 	
 	private Integer id;
 	private String currencyName;
+	private String currencyUrl;
 	private String currencyImg;
 	private String marketPrice;
 	private String price;
@@ -105,14 +106,20 @@ public class Feixiaohao {
 	public void setDescribe(String describe) {
 		this.describe = describe;
 	}
+	public String getCurrencyUrl() {
+		return currencyUrl;
+	}
+	public void setCurrencyUrl(String currencyUrl) {
+		this.currencyUrl = currencyUrl;
+	}
 	@Override
 	public String toString() {
-		return "{\"id\": \"" + id + "\", \"currencyName\": \"" + currencyName + "\", \"currencyImg\": \"" + currencyImg
-				+ "\", \"marketPrice\": \"" + marketPrice + "\", \"price\": \"" + price + "\", \"marketNum\": \""
-				+ marketNum + "\", \"markeyRate\": \"" + markeyRate + "\", \"turnover24h\": \"" + turnover24h
-				+ "\", \"rose1h\": \"" + rose1h + "\", \"rose24h\": \"" + rose24h + "\", \"rose7d\": \"" + rose7d
-				+ "\", \"high24h\": \"" + high24h + "\", \"low24h\": \"" + low24h + "\", \"describe\": \"" + describe
-				+ "\"}";
+		return "{\"id\": \"" + id + "\", \"currencyName\": \"" + currencyName + "\", \"currencyUrl\": \"" + currencyUrl
+				+ "\", \"currencyImg\": \"" + currencyImg + "\", \"marketPrice\": \"" + marketPrice
+				+ "\", \"price\": \"" + price + "\", \"marketNum\": \"" + marketNum + "\", \"markeyRate\": \""
+				+ markeyRate + "\", \"turnover24h\": \"" + turnover24h + "\", \"rose1h\": \"" + rose1h
+				+ "\", \"rose24h\": \"" + rose24h + "\", \"rose7d\": \"" + rose7d + "\", \"high24h\": \"" + high24h
+				+ "\", \"low24h\": \"" + low24h + "\", \"describe\": \"" + describe + "\"}";
 	}
 
 }

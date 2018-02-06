@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,7 +35,7 @@ public class FeiXiaoHaoMain {
 	@Autowired
 	private BiLanMapper lilanMapper;
 
-//	@PostConstruct
+	@PostConstruct
 	private void init() {
 		String html = ZHttpClient.get(INDEX_ULR_ALL);
 		this.parseHtml(html);
@@ -63,6 +65,7 @@ public class FeiXiaoHaoMain {
 						dto.setCurrencyName(td.text());
 						Elements a = td.select("a");
 						String href = a.attr("href");
+						dto.setCurrencyUrl(href);
 						if(StringUtils.isNotEmpty(href)) {
 							getDetail(href, dto);
 						}
@@ -97,7 +100,9 @@ public class FeiXiaoHaoMain {
 				list.add(dto);
 				logger.info(dto.toString());
 			}
-			lilanMapper.batchInsertFeixiaohao(list);
+			for (Feixiaohao feixiaohao : list) {
+				lilanMapper.updateFeixiaohao(feixiaohao);
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {

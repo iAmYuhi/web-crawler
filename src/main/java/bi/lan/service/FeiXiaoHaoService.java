@@ -55,8 +55,8 @@ public class FeiXiaoHaoService {
 	}
 	
 	private void parseFullHtml(String html) {
-		List<Integer> ids = new ArrayList<>();
-		Map<Integer, Feixiaohao> map = new HashMap<>();
+		List<String> urls = new ArrayList<>();
+		Map<String, Feixiaohao> map = new HashMap<>();
 		try {
 			Document doc = Jsoup.parse(html);
 			Elements boxContains = doc.select(".boxContain");
@@ -80,6 +80,8 @@ public class FeiXiaoHaoService {
 						dto.setCurrencyName(td.text());
 						Elements a = td.select("a");
 						String href = a.attr("href");
+						urls.add(href);
+						dto.setCurrencyUrl(href);
 						if(StringUtils.isNotEmpty(href)) {
 							getDetail(href, dto);
 						}
@@ -111,25 +113,24 @@ public class FeiXiaoHaoService {
 						dto.setRose7d(td.text());
 					}
 				}
-				ids.add(dto.getId());
-				map.put(dto.getId(), dto);
+				map.put(dto.getCurrencyUrl(), dto);
 			}
-			this.operationData(ids, map);
+			this.operationData(urls, map);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 	
-	private void operationData(List<Integer> ids, Map<Integer, Feixiaohao> map) {
-		List<Integer> existIds = bilanMapper.getFeixiaohaoExistIds(ids);
+	private void operationData(List<String> urls, Map<String, Feixiaohao> map) {
+		List<String> existUrls = bilanMapper.getFeixiaohaoExistIds(urls);
 		List<Feixiaohao> insertList = new ArrayList<>();
 		List<Feixiaohao> updateList = new ArrayList<>();
-		for (Integer key : existIds) {
+		for (String key : existUrls) {
 			Feixiaohao feixiaohao = map.get(key);
 			updateList.add(feixiaohao);
 			map.remove(key);
 		}
-		for (Integer key : map.keySet()) {
+		for (String key : map.keySet()) {
 			Feixiaohao feixiaohao = map.get(key);
 			insertList.add(feixiaohao);
 		}
@@ -148,7 +149,9 @@ public class FeiXiaoHaoService {
 	private void getDetail(String href, Feixiaohao dto) {
 		String url = DETAIL_URL + href;
 		String html = ZHttpClient.get(url);
-		this.parseDetailHtml(html, dto);
+		if(StringUtils.isNotEmpty(html)) {
+			this.parseDetailHtml(html, dto);
+		}
 	}
 	
 	private void parseDetailHtml(String html, Feixiaohao dto) {
@@ -169,7 +172,9 @@ public class FeiXiaoHaoService {
 			String href = des.select("a").attr("href");
 			String desUrl = DETAIL_URL + href;
 			String desHtml = ZHttpClient.get(desUrl);
-			this.parseHtmlByDes(desHtml, dto);
+			if(StringUtils.isNotEmpty(desHtml)) {
+				this.parseHtmlByDes(desHtml, dto);
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -223,6 +228,9 @@ public class FeiXiaoHaoService {
 					}
 					if(j == 1) {
 						dto.setCurrencyName(td.text());
+						Elements a = td.select("a");
+						String href = a.attr("href");
+						dto.setCurrencyUrl(href);
 						Elements img = td.select("img");
 						dto.setCurrencyImg(img.attr("src").replace("//", ""));
 					}
