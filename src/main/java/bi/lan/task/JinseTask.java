@@ -20,7 +20,7 @@ public class JinseTask {
 	@Autowired
 	private JinseService jinseService;
 	
-	@Scheduled(cron="0 0/5 * * * ?")
+	@Scheduled(cron="0 0/1 * * * ?")
 	public void job() {
 		try {
 			jinseService.getNewConsult();

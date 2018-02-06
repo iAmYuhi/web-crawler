@@ -77,11 +77,13 @@ public class JinseService {
 				if(StringUtils.isNotEmpty(href.trim())) {
 					dto.setUrl(href);
 				}
-				if(dto.getTime().getTime() <= jinseMaxTime.getTime()) {
+				if((dto != null && dto.getTime() != null) && dto.getTime().getTime() <= jinseMaxTime.getTime()) {
 					flag = false;
 				}
-				ids.add(dto.getId());
-				map.put(dto.getId(), dto);
+				if(dto != null && StringUtils.isNotEmpty(dto.getText())) {
+					ids.add(dto.getId());
+					map.put(dto.getId(), dto);
+				}
 			}
 			if(!map.isEmpty()) {
 				List<Jinse> dataList = getList(map, ids);
@@ -141,9 +143,10 @@ public class JinseService {
 							flag = false;
 							break;
 						}
-						logger.info(dto.toString());
-						list.add(dto.getId());
-						map.put(dto.getId(), dto);
+						if(dto != null && StringUtils.isNotEmpty(dto.getText())) {
+							list.add(dto.getId());
+							map.put(dto.getId(), dto);
+						}
 					}
 					if(flag) {
 						if(jsonArray.size() > 0) {
