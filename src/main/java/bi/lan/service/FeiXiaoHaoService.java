@@ -1,14 +1,7 @@
 package bi.lan.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -19,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import bi.lan.common.ZHttpClient;
 import bi.lan.mapper.BiLanMapper;
@@ -36,11 +27,6 @@ public class FeiXiaoHaoService {
 	private static final Logger logger = LoggerFactory.getLogger(FeiXiaoHaoService.class);
 	private static final String INDEX_ULR_ALL = "https://www.feixiaohao.com/all/";
 	private static final String DETAIL_URL = "https://www.feixiaohao.com";
-	private static ThreadFactory FEIXIAOHAO_THREADFACTORY = new ThreadFactoryBuilder()
-			.setNameFormat("feixiaohao-pool-%d").build();
-	private static ExecutorService SINGLE_THREADPOOL = new ThreadPoolExecutor(2, 10, 0L, TimeUnit.MILLISECONDS,
-			new LinkedBlockingQueue<Runnable>(1024), FEIXIAOHAO_THREADFACTORY, new ThreadPoolExecutor.AbortPolicy());
-	
 	
 	@Autowired
 	private BiLanMapper bilanMapper;
@@ -55,8 +41,7 @@ public class FeiXiaoHaoService {
 	}
 	
 	private void parseFullHtml(String html) {
-		List<String> urls = new ArrayList<>();
-		Map<String, Feixiaohao> map = new HashMap<>();
+		List<Feixiaohao> list = new ArrayList<>();
 		try {
 			Document doc = Jsoup.parse(html);
 			Elements boxContains = doc.select(".boxContain");
@@ -69,89 +54,32 @@ public class FeiXiaoHaoService {
 				Element tr = trs.get(i);
 				Elements tds = tr.select("td");
 				Feixiaohao dto = new Feixiaohao();
-				Integer id = 0;
 				for (int j = 0; j < tds.size(); j++) {
 					Element td = tds.get(j);
-					if(j == 0) {
-						id = Integer.valueOf(td.text());
-						dto.setId(id);
-					}
 					if(j == 1) {
-						dto.setCurrencyName(td.text());
 						Elements a = td.select("a");
 						String href = a.attr("href");
-						urls.add(href);
 						dto.setCurrencyUrl(href);
-						if(StringUtils.isNotEmpty(href)) {
-							getDetail(href, dto);
-						}
-						Elements img = td.select("img");
-						dto.setCurrencyImg(img.attr("src").replace("//", ""));
-					}
-					if(j == 2) {
-						dto.setMarketPrice(td.text());
-					}
-					if(j == 3) {
-						dto.setPrice(td.text());
-					}
-					if(j == 4) {
-						dto.setMarketNum(td.text().replace("*", ""));
-					}
-					if(j == 5) {
-						dto.setMarkeyRate(td.text());
-					}
-					if(j == 6) {
-						dto.setTurnover24h(td.text());
-					}
-					if(j == 7) {
-						dto.setRose1h(td.text());
-					}
-					if(j == 8) {
-						dto.setRose24h(td.text());
-					}
-					if(j == 9) {
-						dto.setRose7d(td.text());
+						list.add(dto);
 					}
 				}
-				map.put(dto.getCurrencyUrl(), dto);
 			}
-			this.operationData(urls, map);
+			getDetail(list);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 	
-	private void operationData(List<String> urls, Map<String, Feixiaohao> map) {
-		List<String> existUrls = bilanMapper.getFeixiaohaoExistIds(urls);
-		List<Feixiaohao> insertList = new ArrayList<>();
-		List<Feixiaohao> updateList = new ArrayList<>();
-		for (String key : existUrls) {
-			Feixiaohao feixiaohao = map.get(key);
-			updateList.add(feixiaohao);
-			map.remove(key);
-		}
-		for (String key : map.keySet()) {
-			Feixiaohao feixiaohao = map.get(key);
-			insertList.add(feixiaohao);
-		}
-		SINGLE_THREADPOOL.execute(() -> {
-			bilanMapper.batchInsertFeixiaohao(insertList);
-			logger.info("full data insert {} data success!", insertList.size());
-		});
-		SINGLE_THREADPOOL.execute(() -> {
-			for (Feixiaohao feixiaohao : updateList) {
-				bilanMapper.updateFeixiaohao(feixiaohao);
+	private void getDetail(List<Feixiaohao> list) {
+		for (Feixiaohao feixiaohao : list) {
+			String url = DETAIL_URL + feixiaohao.getCurrencyUrl();
+			String html = ZHttpClient.get(url);
+			if(StringUtils.isNotEmpty(html)) {
+				this.parseDetailHtml(html, feixiaohao);
 			}
-			logger.info("full data update {} data success!", updateList.size());
-		});
-	}
-
-	private void getDetail(String href, Feixiaohao dto) {
-		String url = DETAIL_URL + href;
-		String html = ZHttpClient.get(url);
-		if(StringUtils.isNotEmpty(html)) {
-			this.parseDetailHtml(html, dto);
+			bilanMapper.updateFeixiaohao(feixiaohao);
 		}
+		logger.info("success operation full task {} data!", list.size());
 	}
 	
 	private void parseDetailHtml(String html, Feixiaohao dto) {

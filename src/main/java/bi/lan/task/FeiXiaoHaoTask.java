@@ -20,7 +20,7 @@ public class FeiXiaoHaoTask {
 	@Autowired
 	private FeiXiaoHaoService feixiaohaoService;
 	
-	@Scheduled(cron="0/30 * * * * ?")
+	@Scheduled(cron="0/10 * * * * ?")
 	public void job() {
 		try {
 			feixiaohaoService.getCurrency();

@@ -35,7 +35,7 @@ public class FeiXiaoHaoMain {
 	@Autowired
 	private BiLanMapper lilanMapper;
 
-	@PostConstruct
+//	@PostConstruct
 	private void init() {
 		String html = ZHttpClient.get(INDEX_ULR_ALL);
 		this.parseHtml(html);
@@ -54,55 +54,22 @@ public class FeiXiaoHaoMain {
 				Element tr = trs.get(i);
 				Elements tds = tr.select("td");
 				Feixiaohao dto = new Feixiaohao();
-				Integer id = 0;
 				for (int j = 0; j < tds.size(); j++) {
 					Element td = tds.get(j);
-					if(j == 0) {
-						id = Integer.valueOf(td.text());
-						dto.setId(id);
-					}
 					if(j == 1) {
 						dto.setCurrencyName(td.text());
 						Elements a = td.select("a");
 						String href = a.attr("href");
 						dto.setCurrencyUrl(href);
-						if(StringUtils.isNotEmpty(href)) {
-							getDetail(href, dto);
-						}
-						Elements img = td.select("img");
-						dto.setCurrencyImg(img.attr("src").replace("//", ""));
-					}
-					if(j == 2) {
-						dto.setMarketPrice(td.text());
-					}
-					if(j == 3) {
-						dto.setPrice(td.text());
-					}
-					if(j == 4) {
-						dto.setMarketNum(td.text().replace("*", ""));
-					}
-					if(j == 5) {
-						dto.setMarkeyRate(td.text());
-					}
-					if(j == 6) {
-						dto.setTurnover24h(td.text());
-					}
-					if(j == 7) {
-						dto.setRose1h(td.text());
-					}
-					if(j == 8) {
-						dto.setRose24h(td.text());
-					}
-					if(j == 9) {
-						dto.setRose7d(td.text());
 					}
 				}
 				list.add(dto);
-				logger.info(dto.toString());
 			}
-			for (Feixiaohao feixiaohao : list) {
-				lilanMapper.updateFeixiaohao(feixiaohao);
-			}
+			this.getDetail(list);
+			logger.info(list.toString());
+//			for (Feixiaohao feixiaohao : list) {
+//				lilanMapper.updateFeixiaohao(feixiaohao);
+//			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
@@ -110,10 +77,12 @@ public class FeiXiaoHaoMain {
 		}
 	}
 
-	private void getDetail(String href, Feixiaohao dto) {
-		String url = DETAIL_URL + href;
-		String html = ZHttpClient.get(url);
-		parseDetailHtml(html, dto);
+	private void getDetail(List<Feixiaohao> list) {
+		for (Feixiaohao feixiaohao : list) {
+			String url = DETAIL_URL + feixiaohao.getCurrencyUrl();
+			String html = ZHttpClient.get(url);
+			parseDetailHtml(html, feixiaohao);
+		}
 	}
 
 	private void parseDetailHtml(String html, Feixiaohao dto) {
@@ -132,9 +101,16 @@ public class FeiXiaoHaoMain {
 			}
 			Elements des = doc.select(".des");
 			String href = des.select("a").attr("href");
-			String desUrl = DETAIL_URL + href;
-			String desHtml = ZHttpClient.get(desUrl);
-			parseHtmlByDes(desHtml, dto);
+			if(StringUtils.isNotEmpty(href)) {
+				String desUrl = DETAIL_URL + href;
+				String desHtml = ZHttpClient.get(desUrl);
+				if(StringUtils.isNotEmpty(desHtml)) {
+					parseHtmlByDes(desHtml, dto);
+				} else {
+					logger.info("des url is empty:{}, {}", desUrl, desHtml);
+					dto.setDescribe("");
+				}
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}

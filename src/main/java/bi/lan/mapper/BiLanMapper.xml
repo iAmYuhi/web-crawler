@@ -118,7 +118,10 @@
 	            `high24h` = #{high24h},
 	        </if>
 	        <if test="low24h != null and low24h != ''">
-	            `low24h` = #{low24h}
+	            `low24h` = #{low24h},
+	        </if>
+	        <if test="describe != null and describe != ''">
+	            `describe` = #{describe}
 	        </if>
         </set>
     		WHERE `currency_url` = #{currencyUrl}

@@ -29,7 +29,9 @@ CREATE TABLE `tb_currency` (
   `high24h` varchar(50) NOT NULL DEFAULT '' COMMENT '24h最高',
   `low24h` varchar(50) NOT NULL DEFAULT '' COMMENT '24h最低',
   `describe` text COMMENT '介绍详情',
-  PRIMARY KEY (`id`)
+  `currency_url` varchar(100) NOT NULL DEFAULT '' COMMENT '跳转url',
+  PRIMARY KEY (`id`),
+  KEY `uk_currency_url` (`currency_url`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='货币列表';
 
 DROP TABLE IF EXISTS tb_news;
