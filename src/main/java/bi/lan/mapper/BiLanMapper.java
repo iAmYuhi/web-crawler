@@ -20,6 +20,7 @@ public interface BiLanMapper {
 	void updateJinse(Jinse jinse);
 	List<Integer> getExistIds(@Param("list") List<Integer> ids);
 	
+	List<Integer> getFeixiaohaoExistIds(@Param("list") List<Integer> ids);
 	void batchInsertFeixiaohao(@Param("list") List<Feixiaohao> list);
 	void updateFeixiaohao(Feixiaohao model);
 	

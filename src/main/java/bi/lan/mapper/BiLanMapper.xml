@@ -50,6 +50,15 @@
         </if>
 	</select>
 	
+	<select id="getFeixiaohaoExistIds" resultType="Integer">
+    		SELECT `id` FROM tb_currency WHERE `id` IN
+		<if test="list != null and list.size() > 0">
+            <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+	
 	<insert id="batchInsertJinse">
         INSERT INTO tb_consult(`id`,`text`,`url`,`time`) VALUES
         <if test="list != null and list.size() > 0">
